@@ -20,6 +20,7 @@ jobs:
         # Add each image directory name here; it must match images/<name>/.
         image:
           - ubuntu-tools
+          - aws-cli-oras
 
     steps:
       - name: Check out repository
