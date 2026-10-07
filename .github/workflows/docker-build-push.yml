@@ -21,6 +21,7 @@ jobs:
         image:
           - ubuntu-tools
           - aws-cli-oras
+          - kong-deck
 
     steps:
       - name: Check out repository

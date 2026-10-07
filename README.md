@@ -8,6 +8,7 @@ Docker images built from this repository and published to Docker Hub with GitHub
 | --- | --- | --- |
 | `ubuntu-tools` | Ubuntu 24.04 with Git, curl, CA certificates, and yq | `docker pull <DOCKERHUB_USERNAME>/ubuntu-tools:latest` |
 | `aws-cli-oras` | AWS CLI v2 and ORAS for working with OCI artifacts and Amazon ECR | `docker pull <DOCKERHUB_USERNAME>/aws-cli-oras:latest` |
+| `kong-deck` | Ubuntu 24.04 with Kong Deck v1.67.0 and jq | `docker pull <DOCKERHUB_USERNAME>/kong-deck:latest` |
 
 Replace `<DOCKERHUB_USERNAME>` with your Docker Hub username. The `latest` tag is published from pushes to `main`; version and commit SHA tags are also generated.
 
