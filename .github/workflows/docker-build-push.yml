@@ -7,21 +7,87 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      image:
+        description: Image to build manually
+        type: choice
+        required: true
+        default: all
+        options:
+          - all
+          - ubuntu-tools
+          - aws-cli-oras
+          - kong/deck
 
 permissions:
   contents: read
 
 jobs:
+  detect-images:
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.filter.outputs.images }}
+      has-images: ${{ steps.filter.outputs.has-images }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed images
+        id: filter
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+          SELECTED_IMAGE: ${{ inputs.image }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            if [[ "$SELECTED_IMAGE" == "all" ]]; then
+              changed_images=$(find images -type f -name Dockerfile -printf '%h\n' |
+                sed 's#^images/##' |
+                sort)
+            else
+              changed_images=$SELECTED_IMAGE
+            fi
+          else
+            if [[ -n "$BEFORE" && "$BEFORE" != "0000000000000000000000000000000000000000" ]]; then
+              changed_files=$(git diff --name-only "$BEFORE" "$SHA")
+            elif git rev-parse --verify "$SHA^" >/dev/null 2>&1; then
+              changed_files=$(git diff --name-only "$SHA^" "$SHA")
+            else
+              changed_files=$(git diff-tree --root --no-commit-id --name-only -r "$SHA")
+            fi
+            changed_images=$(
+              while IFS= read -r image_dir; do
+                while IFS= read -r changed_file; do
+                  if [[ "$changed_file" == "$image_dir/"* ]]; then
+                    printf '%s\n' "${image_dir#images/}"
+                    break
+                  fi
+                done <<< "$changed_files"
+              done < <(find images -type f -name Dockerfile -printf '%h\n' | sort)
+            )
+          fi
+
+          images_json=$(printf '%s\n' "$changed_images" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "images=$images_json" >> "$GITHUB_OUTPUT"
+          if [[ "$images_json" == "[]" ]]; then
+            echo "has-images=false" >> "$GITHUB_OUTPUT"
+            echo "No image directories changed; skipping image builds."
+          else
+            echo "has-images=true" >> "$GITHUB_OUTPUT"
+            echo "Images selected for build: $images_json"
+          fi
+
   build-and-push:
+    needs: detect-images
+    if: needs.detect-images.outputs.has-images == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        # Add each image directory name here; it must match images/<name>/.
-        image:
-          - ubuntu-tools
-          - aws-cli-oras
-          - kong-deck
+        image: ${{ fromJSON(needs.detect-images.outputs.images) }}
 
     steps:
       - name: Check out repository
@@ -38,6 +104,18 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set cache scope
+        id: cache
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          if [[ "$IMAGE" == "kong/deck" ]]; then
+            CACHE_SCOPE="kong-deck"
+          else
+            CACHE_SCOPE="$IMAGE"
+          fi
+          printf 'scope=%s\n' "$CACHE_SCOPE" >> "$GITHUB_OUTPUT"
 
       - name: Extract Docker metadata
         id: meta
@@ -59,5 +137,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+          cache-from: type=gha,scope=${{ steps.cache.outputs.scope }}
+          cache-to: type=gha,mode=max,scope=${{ steps.cache.outputs.scope }}
