@@ -6,7 +6,7 @@ Docker images built from this repository and published to Docker Hub with GitHub
 
 | Image | Contents | Pull command |
 | --- | --- | --- |
-| `ubuntu-tools` | Alpine 3.22 with Git, curl, CA certificates, and yq | `docker pull <DOCKERHUB_USERNAME>/ubuntu-tools:latest` |
+| `utility-tools` | Alpine 3.22 with Git, curl, CA certificates, and yq | `docker pull <DOCKERHUB_USERNAME>/utility-tools:latest` |
 | `aws-cli-oras` | AWS CLI v2 and ORAS for working with OCI artifacts and Amazon ECR | `docker pull <DOCKERHUB_USERNAME>/aws-cli-oras:latest` |
 | `kong-deck` | Alpine 3.22 with Kong Deck v1.67.0 and jq | `docker pull <DOCKERHUB_USERNAME>/kong-deck:v1.67.0` |
 

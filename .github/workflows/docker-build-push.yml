@@ -15,7 +15,7 @@ on:
         default: all
         options:
           - all
-          - ubuntu-tools
+          - utility-tools
           - aws-cli-oras
           - kong-deck
 
