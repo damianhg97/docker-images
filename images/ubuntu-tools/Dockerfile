@@ -1,16 +1,12 @@
-FROM ubuntu:24.04
+FROM alpine:3.22
 
 ARG TARGETARCH
 
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+RUN apk add --no-cache \
         bash \
         ca-certificates \
         curl \
-        git \
-    && rm -rf /var/lib/apt/lists/*
+        git
 
 RUN curl -fsSL "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${TARGETARCH}" \
         -o /usr/local/bin/yq \

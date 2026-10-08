@@ -6,9 +6,9 @@ Docker images built from this repository and published to Docker Hub with GitHub
 
 | Image | Contents | Pull command |
 | --- | --- | --- |
-| `ubuntu-tools` | Ubuntu 24.04 with Git, curl, CA certificates, and yq | `docker pull <DOCKERHUB_USERNAME>/ubuntu-tools:latest` |
+| `ubuntu-tools` | Alpine 3.22 with Git, curl, CA certificates, and yq | `docker pull <DOCKERHUB_USERNAME>/ubuntu-tools:latest` |
 | `aws-cli-oras` | AWS CLI v2 and ORAS for working with OCI artifacts and Amazon ECR | `docker pull <DOCKERHUB_USERNAME>/aws-cli-oras:latest` |
-| `kong/deck` | Ubuntu 24.04 with Kong Deck v1.67.0 and jq | `docker pull <DOCKERHUB_USERNAME>/kong/deck:latest` |
+| `kong-deck` | Alpine 3.22 with Kong Deck v1.67.0 and jq | `docker pull <DOCKERHUB_USERNAME>/kong-deck:v1.67.0` |
 
 Replace `<DOCKERHUB_USERNAME>` with your Docker Hub username. The `latest` tag is published from pushes to `main`; version and commit SHA tags are also generated.
 
@@ -23,7 +23,7 @@ Add these repository secrets under **Settings > Secrets and variables > Actions*
 
 ## Add Another Image
 
-1. Create an image directory under `images/`, such as `images/my-tools/` or `images/org/my-tools/`, and add its `Dockerfile`.
+1. Create an image directory under `images/`, such as `images/my-tools/`, and add its `Dockerfile`. The directory name becomes the Docker Hub repository name.
 2. Add the image directory path (relative to `images/`) to the manual image choices under `workflow_dispatch` in `.github/workflows/docker-build-push.yml`. The workflow automatically detects changed image directories on pushes.
 3. Add the image and its pull command to the table above.
 4. Push the changes to `main` or start the workflow manually from the **Actions** tab.

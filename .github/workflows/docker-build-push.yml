@@ -17,7 +17,7 @@ on:
           - all
           - ubuntu-tools
           - aws-cli-oras
-          - kong/deck
+          - kong-deck
 
 permissions:
   contents: read
@@ -105,18 +105,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set cache scope
-        id: cache
-        env:
-          IMAGE: ${{ matrix.image }}
-        run: |
-          if [[ "$IMAGE" == "kong/deck" ]]; then
-            CACHE_SCOPE="kong-deck"
-          else
-            CACHE_SCOPE="$IMAGE"
-          fi
-          printf 'scope=%s\n' "$CACHE_SCOPE" >> "$GITHUB_OUTPUT"
-
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -124,9 +112,10 @@ jobs:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+            type=raw,value=v1.67.0,enable=${{ matrix.image == 'kong-deck' }}
+            type=semver,pattern={{version}},enable=${{ matrix.image != 'kong-deck' }}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ matrix.image != 'kong-deck' }}
+            type=semver,pattern={{major}},enable=${{ matrix.image != 'kong-deck' }}
             type=sha
 
       - name: Build and push image
@@ -137,5 +126,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ steps.cache.outputs.scope }}
-          cache-to: type=gha,mode=max,scope=${{ steps.cache.outputs.scope }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
