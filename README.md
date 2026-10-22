@@ -8,9 +8,18 @@ Docker images built from this repository and published to Docker Hub with GitHub
 | --- | --- | --- |
 | `utility-tools` | Alpine 3.22 with Git, curl, CA certificates, and yq | `docker pull <DOCKERHUB_USERNAME>/utility-tools:latest` |
 | `aws-cli-oras` | AWS CLI v2 and ORAS for working with OCI artifacts and Amazon ECR | `docker pull <DOCKERHUB_USERNAME>/aws-cli-oras:latest` |
+| `cosign` | Cosign and AWS CLI for signing and verifying container images | `docker pull <DOCKERHUB_USERNAME>/cosign:latest` |
 | `kong-deck` | Alpine 3.22 with Kong Deck v1.67.0 and jq | `docker pull <DOCKERHUB_USERNAME>/kong-deck:v1.67.0` |
 
 Replace `<DOCKERHUB_USERNAME>` with your Docker Hub username. The `latest` tag is published from pushes to `main`; version and commit SHA tags are also generated.
+
+The `cosign` image is based on `amazon/aws-cli:latest`. Cosign is the default
+command, and AWS CLI remains available by passing `aws` as the first argument:
+
+```sh
+docker run --rm <DOCKERHUB_USERNAME>/cosign:latest version
+docker run --rm <DOCKERHUB_USERNAME>/cosign:latest aws --version
+```
 
 ## Configure GitHub Actions
 

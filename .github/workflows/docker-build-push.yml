@@ -17,6 +17,7 @@ on:
           - all
           - utility-tools
           - aws-cli-oras
+          - cosign
           - kong-deck
 
 permissions:
