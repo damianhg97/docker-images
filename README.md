@@ -13,8 +13,9 @@ Docker images built from this repository and published to Docker Hub with GitHub
 
 Replace `<DOCKERHUB_USERNAME>` with your Docker Hub username. The `latest` tag is published from pushes to `main`; version and commit SHA tags are also generated.
 
-The `cosign` image is based on `amazon/aws-cli:latest`. Cosign is the default
-command, and AWS CLI remains available by passing `aws` as the first argument:
+The `aws-cli-oras` and `cosign` images use Alpine 3.24 with AWS CLI v2 installed
+from Alpine's package repository. Cosign is the default command in the `cosign`
+image, and AWS CLI remains available by passing `aws` as the first argument:
 
 ```sh
 docker run --rm <DOCKERHUB_USERNAME>/cosign:latest version
